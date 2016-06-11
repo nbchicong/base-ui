@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="base-core" basedir=".">
+    <property name="project-name" value="Base Core"/>
+    <property name="resources.dir" value="${basedir}"/>
+    <property name="js.dir" value="${resources.dir}/js"/>
+
+    <property name="sources.dir" value="${js.dir}"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build-lib.dir" value="${basedir}/build/libs"/>
+    <property name="apps.dir" value="${basedir}/build/apps"/>
+    <property name="target.dir" value="${basedir}/target"/>
+    <property name="libs.dir" value="${basedir}/target/libs"/>
+
+    <property name="buildtool.dir" value="${basedir}"/>
+    <property name="jsBuilder" location="${buildtool.dir}/jsbuilder.jar"/>
+    <taskdef name="jsbuilder" classname="org.antz29.jsbuilder.ant.BuilderTask" classpath="${jsBuilder}"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}" deleteonexit="true"/>
+        <delete dir="${target.dir}" deleteonexit="true"/>
+        <delete dir="${libs.dir}" deleteonexit="true"/>
+        <delete dir="${apps.dir}" deleteonexit="true"/>
+    </target>
+
+    <target name="init" description="Create the build dir">
+        <mkdir dir="${build-lib.dir}"/>
+        <mkdir dir="${target.dir}"/>
+        <mkdir dir="${libs.dir}"/>
+        <mkdir dir="${apps.dir}"/>
+        <echo>Target dir has been installed!</echo>
+    </target>
+
+    <target name="js-core.compile" description="JavaScript Core Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="{PACKAGE}.min.js">
+            <module package="base" name="Copyright" file="${sources.dir}/core/Copy.js"/>
+            <module package="base" name="Base" file="${sources.dir}/core/Base.js"/>
+            <module package="base" name="Component" file="${sources.dir}/core/Component.js"/>
+            <module package="base" name="Notify" file="${sources.dir}/core/Notify.js"/>
+            <module package="base" name="Clazz" file="${sources.dir}/core/Clazz.js"/>
+            <module package="hashtable" name="Hashtable" file="${sources.dir}/core/Hashtable.js"/>
+        </jsbuilder>
+    </target>
+
+    <target name="js-grid-components.compile" description="JS Grid Components Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="components/{PACKAGE}.min.js">
+            <source path="${sources.dir}/components/grid"/>
+        </jsbuilder>
+    </target>
+
+    <target name="js-dialog-components.compile" description="JS Dialog Components Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="components/{PACKAGE}.min.js">
+            <source path="${sources.dir}/components/dialog"/>
+        </jsbuilder>
+    </target>
+
+    <target name="js-base-class.compile" description="JS Base Class Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/class"/>
+        </jsbuilder>
+    </target>
+
+    <target name="js-apps.compile" description="JS Applications Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="apps/{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/apps"/>
+        </jsbuilder>
+    </target>
+
+    <target name="copy-apps.libs" depends="js-apps.compile" description="Copy Applications minify">
+        <copy todir="${target.dir}/apps" overwrite="true">
+            <fileset dir="${build-lib.dir}/apps" includes="**/*.min.js"/>
+        </copy>
+    </target>
+
+    <target name="copy.libs" depends="
+        js-core.compile,
+        js-base-class.compile,
+        js-grid-components.compile,
+        js-dialog-components.compile" description="Copy all minify">
+        <copy todir="${libs.dir}" overwrite="true">
+            <fileset dir="${build-lib.dir}" includes="**/*.min.js"/>
+        </copy>
+    </target>
+
+    <target name="build.libs" depends="
+        copy.libs,
+        copy-apps.libs" description="Build All" >
+        <delete dir="${build.dir}" deleteonexit="true"/>
+    </target>
+
+</project>
