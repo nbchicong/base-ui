@@ -23,12 +23,13 @@ $(function () {
     this.id = 'product-entity';
     this.submitType = 'JSON';
     this.$toolbar = {
-      BACK: $('$btn-back'),
+      BACK: $('#btn-back'),
       CREATE: $('#btn-add'),
       SAVE: $('#btn-save')
     };
     this.url = {
       list: ('product/list'),
+      load: ('product/load'),
       create: ('product/create'),
       update: ('product/update'),
       remove: ('product/remove')
@@ -36,6 +37,7 @@ $(function () {
     this.$listItem = $('#list-items');
     this.$content = $('#item-content');
     this.$form = {
+      id: $('#txt-id'),
       name: $('#txt-name'),
       code: $('#txt-code'),
       category: $('#cbb-category'),
@@ -59,21 +61,21 @@ $(function () {
         type: 'text',
         align: 'left'
       }, {
-        property: 'name',
+        property: 'categoryId',
         label: 'Loại',
         sortable : true,
         type: 'text',
         align: 'left',
         width: 100
       }, {
-        property: 'name',
+        property: 'brandId',
         label: 'Nhà sản xuất',
         sortable : true,
         type: 'text',
         align: 'left',
         width: 150
       }, {
-        property: 'name',
+        property: 'price',
         label: 'Giá',
         sortable : true,
         type: 'text',
@@ -125,12 +127,20 @@ $(function () {
     UI.ProductEntity.superclass.constructor.call(this);
     this.$toolbar.CREATE.on('click', function () {
       _this.clear();
-      _this.grid.newRecord();
+      _this.next();
+    });
+    this.$toolbar.BACK.on('click', function () {
+      _this.clear();
+      _this.prev();
+    });
+    this.$toolbar.SAVE.on('click', function () {
+      _this.save(_this);
     });
   };
   BaseUI.extend(UI.ProductEntity, UI.Entity, {
     clear: function () {
       this.setEntityId(null);
+      this.getForm().find('input,textarea').val('');
     },
     setEntity: function (data) {
       this.entity = data;
@@ -158,7 +168,7 @@ $(function () {
         __fd.append(item.name, item.value);
       });
       if (!BaseUI.isEmpty(this.getEntityId())) {
-        __fd.append('id', this.getEntityId());
+        __fd.append(this.getIdProperties(), this.getEntityId());
       }
       return __fd;
     },
@@ -166,39 +176,60 @@ $(function () {
       return this.$content.find('form');
     },
     create: function (callback) {
+      var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.create,
-        data: this.getData(),
-        cache: false,
-        contentType: false,
-        processData: false,
+        clearForm: false,
+        uploadProgress: function (event, position, total, percentComplete) {
+          console.log('upload progress', position, total, percentComplete);
+        },
+        success: function (responseText, statusText, xhr) {
+          __fn(responseText, statusText, xhr);
+        },
+        error: function (error) {
+          console.log('create error', error);
+        },
         type: 'POST'
       };
-      var __fn = callback || BaseUI.emptyFn;
-      if (!BaseUI.isEmpty(this.getParams())) {
-        this.sendAjax(__options, __fn);
-      } else {
-        console.log('%cParams can not empty when change data', 'color: #FF0000');
-      }
+      this.getForm().ajaxSubmit(__options);
+      // if (!BaseUI.isEmpty(this.getParams())) {
+      //   this.sendAjax(__options, __fn);
+      // } else {
+      //   console.log('%cParams can not empty when change data', 'color: #FF0000');
+      // }
     },
     update: function (callback) {
+      var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.update,
-        data: this.getData(),
-        cache: false,
-        contentType: false,
-        processData: false,
+        clearForm: false,
+        uploadProgress: function (event, position, total, percentComplete) {
+          console.log('upload progress', position, total, percentComplete);
+        },
+        success: function (responseText, statusText, xhr) {
+          __fn(responseText, statusText, xhr);
+        },
+        error: function (error) {
+          console.log('update error', error);
+        },
         type: 'POST'
       };
-      var __fn = callback || BaseUI.emptyFn;
-      if (!BaseUI.isEmpty(this.getParams())) {
-        this.sendAjax(__options, __fn);
-      } else {
-        console.log('%cParams can not empty when change data', 'color: #FF0000');
-      }
+      this.$form.id.val(this.getEntityId());
+      this.getForm().ajaxSubmit(__options);
+      // if (!BaseUI.isEmpty(this.getParams())) {
+      //   this.sendAjax(__options, __fn);
+      // } else {
+      //   console.log('%cParams can not empty when change data', 'color: #FF0000');
+      // }
     },
     save: function () {
       var _this = this;
+      console.log('save product', this.getForm());
+      // this.getForm().ajaxSubmit();
+      // this.getForm().submit(function () {
+      //   $(this).ajaxSubmit();
+      //   return false;
+      // });
       if (!BaseUI.isEmpty(this.getEntityId())) {
         this.update(function (data) {
           _this.responseHandle(data, function () {
@@ -217,11 +248,27 @@ $(function () {
         });
       }
     },
-    load: function () {
-      
+    load: function (callback) {
+      var __params = {id: this.getEntityId()};
+      var __fn = callback || BaseUI.emptyFn;
+      this.sendAjax({
+        url: this.url.load,
+        method: 'GET',
+        data: (this.getSubmitType()=='JSON_STRING'?JSON.stringify(__params):__params),
+        dataType: 'JSON',
+        contentType: 'application/json'
+      }, __fn);
     },
     editRow: function (row) {
-      
+      var _this = this;
+      this.setEntity(row);
+      this.setEntityId(row[this.getIdProperties()]);
+      this.load(function (data) {
+        _this.responseHandle(data, function () {
+          _this.setData(data);
+          _this.next();
+        });
+      });
     },
     removeRow: function (row) {
       var _this = this;
@@ -232,6 +279,18 @@ $(function () {
           _this.grid.remove(row[_this.getIdProperties()]);
         });
       });
+    },
+    prev: function () {
+      this.$listItem.show();
+      this.$content.hide();
+      this.$toolbar.BACK.hide();
+      this.$toolbar.SAVE.hide();
+    },
+    next: function () {
+      this.$listItem.hide();
+      this.$content.show();
+      this.$toolbar.BACK.show();
+      this.$toolbar.SAVE.show();
     }
   });
   new UI.ProductEntity();
