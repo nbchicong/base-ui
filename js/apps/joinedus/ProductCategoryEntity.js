@@ -1,6 +1,6 @@
 /**
  * #PACKAGE: joinedus
- * #MODULE: category-entity
+ * #MODULE: product-category-entity
  */
 /**
  * @license Copyright (c) 2016 CT1905
@@ -9,19 +9,19 @@
  */
 /**
  * Project: laravel
- * @name: CategoryEntity
+ * @name: ProductCategoryEntity
  * @package: ${NAMESPACE}
  * @author: nbchicong
  */
 $(function () {
   /**
-   * @class UI.CategoryEntity
+   * @class UI.ProductCategoryEntity
    * @extends UI.Entity
    */
-  UI.CategoryEntity = function () {
+  UI.ProductCategoryEntity = function () {
     var _this = this;
     var parentCate = listCate || [];
-    this.id = 'category-entity';
+    this.id = 'product-category';
     this.submitType = 'JSON';
     this.$toolbar = {
       CREATE: $('#btn-add')
@@ -96,7 +96,7 @@ $(function () {
       pageSize: 10,
       remotePaging: true
     });
-    UI.CategoryEntity.superclass.constructor.call(this);
+    UI.ProductCategoryEntity.superclass.constructor.call(this);
     this.$toolbar.CREATE.on('click', function () {
       _this.clear();
       _this.grid.newRecord();
@@ -112,7 +112,7 @@ $(function () {
       _this['save'].call(_this);
     });
   };
-  BaseUI.extend(UI.CategoryEntity, UI.Entity, {
+  BaseUI.extend(UI.ProductCategoryEntity, UI.Entity, {
     clear: function () {
       this.setEntityId(null);
     },
@@ -159,6 +159,6 @@ $(function () {
       });
     }
   });
-  new UI.CategoryEntity();
+  new UI.ProductCategoryEntity();
 //  http://123.20.207.23/html/xem-chi-tiet-minhthanh11-10.html
 });
