@@ -1,6 +1,6 @@
 /**
  * #PACKAGE: joinedus
- * #MODULE: entry-entity
+ * #MODULE: carousel-entity
  */
 /**
  * @license Copyright (c) 2016 CT1905
@@ -9,49 +9,18 @@
  */
 /**
  * Project: laravel
- * @name: EntryEntity
+ * @name: CarouselEntity
  * @package: ${NAMESPACE}
  * @author: nbchicong
  */
 $(function () {
   /**
-   * @class UI.EntryEntity
+   * @class UI.CarouselEntity
    * @extends UI.Entity
    */
-  var __contentEditor = null;
-  var __editorInstalled = false;
-  function __renderListFontSize(begin, end) {
-    var __font = '';
-    for (var i = begin; i <= end; i++) {
-      __font += i + 'px ';
-    }
-    return __font.slice(0, -1);
-  }
-  function __installTinyMCE() {
-    tinymce.init({
-      selector: '#txt-content',
-      height: 400,
-      plugins: [
-        'advlist autolink lists link image charmap print preview anchor',
-        'searchreplace visualblocks code fullscreen',
-        'insertdatetime media table contextmenu paste code'
-      ],
-      toolbar: 'undo redo | styleselect fontselect fontsizeselect | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-      content_css: [
-        '../../../css/bootstrap.min.css',
-        '../../../css/main.css',
-        '../../../css/responsive.css'
-      ],
-      fontsize_formats: __renderListFontSize(9, 36),
-      init_instance_callback: function (editor) {
-        __contentEditor = editor;
-        __editorInstalled = true;
-      }
-    });
-  }
-  UI.EntryEntity = function () {
+  UI.CarouselEntity = function () {
     var _this = this;
-    this.id = 'entry-entity';
+    this.id = 'carousel-entity';
     this.submitType = 'JSON';
     this.$toolbar = {
       BACK: $('#btn-back'),
@@ -59,47 +28,40 @@ $(function () {
       SAVE: $('#btn-save')
     };
     this.url = {
-      list: ('entry/list'),
-      load: ('entry/load'),
-      create: ('entry/create'),
-      update: ('entry/update'),
-      remove: ('entry/remove')
+      list: ('carousel/list'),
+      load: ('carousel/load'),
+      create: ('carousel/create'),
+      update: ('carousel/update'),
+      remove: ('carousel/remove')
     };
     this.$listItem = $('#list-items');
     this.$content = $('#item-content');
     this.$form = {
       id: $('#txt-id'),
+      header: $('#txt-header'),
       title: $('#txt-title'),
-      category: $('#cbb-category'),
-      content: $('#txt-content'),
-      image: $('#txt-price'),
-      tags: $('#txt-tags')
+      product: $('#cbb-product'),
+      image: $('#file-image'),
+      message: $('#txt-message')
     };
     this.dataSource = new UI.grid.DataSource({
-      columns: [/*{
+      columns: [{
         type: 'selection',
         align: 'center',
         width: 30
-      }, */{
+      }, {
         property: 'title',
-        label: 'Tên bài viết',
+        label: 'Tiêu đề',
         sortable : true,
         type: 'text',
         align: 'left'
       }, {
-        property: 'cateId',
-        label: 'Loại',
+        property: 'productId',
+        label: 'Sản phẩm',
         sortable : true,
         type: 'text',
         align: 'left',
-        width: 100
-      }, {
-        property: 'author',
-        label: 'Người viết',
-        sortable : true,
-        type: 'text',
-        align: 'left',
-        width: 150
+        width: 250
       }, {
         label: '',
         type: 'action',
@@ -143,8 +105,7 @@ $(function () {
       pageSize: 10,
       remotePaging: true
     });
-    UI.EntryEntity.superclass.constructor.call(this);
-    __installTinyMCE.call(this);
+    UI.CarouselEntity.superclass.constructor.call(this);
     this.$toolbar.CREATE.on('click', function () {
       _this.clear();
       _this.next();
@@ -157,7 +118,7 @@ $(function () {
       _this.save(_this);
     });
   };
-  BaseUI.extend(UI.EntryEntity, UI.Entity, {
+  BaseUI.extend(UI.CarouselEntity, UI.Entity, {
     clear: function () {
       this.setEntityId(null);
       this.getForm().find('input,textarea').val('');
@@ -168,19 +129,12 @@ $(function () {
     getEntity: function () {
       return this.entity;
     },
-    setEditorContent: function (content) {
-      if (__editorInstalled)
-        __contentEditor.setContent(content);
-      else
-        this.setEditorContent(content);
-    },
     setData: function (data) {
       this.setEntity(data);
+      this.$form.header.val(data.header);
       this.$form.title.val(data.title);
-      this.$form.category.val(data.cateId);
-      this.$form.image.val(data.image);
-      this.$form.tags.val(data.tags);
-      this.setEditorContent(BaseUI.isEmpty(data.content)?'':data.content);
+      this.$form.product.val(data.productId);
+      this.$form.message.val(data.message);
     },
     getData: function () {
       var __fd = new FormData();
@@ -188,7 +142,6 @@ $(function () {
       this.getParams().forEach(function (item) {
         __fd.append(item.name, item.value);
       });
-      __fd.append('content', __contentEditor.getContent());
       if (!BaseUI.isEmpty(this.getEntityId())) {
         __fd.append(this.getIdProperties(), this.getEntityId());
       }
@@ -198,14 +151,10 @@ $(function () {
       return this.$content.find('form');
     },
     create: function (callback) {
-      var _this = this;
       var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.create,
         clearForm: false,
-        beforeSerialize: function () {
-          _this.$form.content.val(__contentEditor.getContent());
-        },
         uploadProgress: function (event, position, total, percentComplete) {
           console.log('upload progress', position, total, percentComplete);
         },
@@ -225,14 +174,10 @@ $(function () {
       // }
     },
     update: function (callback) {
-      var _this = this;
       var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.update,
         clearForm: false,
-        beforeSerialize: function () {
-          _this.$form.content.val(__contentEditor.getContent());
-        },
         uploadProgress: function (event, position, total, percentComplete) {
           console.log('upload progress', position, total, percentComplete);
         },
@@ -254,7 +199,7 @@ $(function () {
     },
     save: function () {
       var _this = this;
-      console.log('save entry', this.getForm());
+      console.log('save carousel', this.getForm());
       // this.getForm().ajaxSubmit();
       // this.getForm().submit(function () {
       //   $(this).ajaxSubmit();
@@ -323,5 +268,6 @@ $(function () {
       this.$toolbar.SAVE.show();
     }
   });
-  new UI.EntryEntity();
+  new UI.CarouselEntity();
+//  http://123.20.207.23/html/xem-chi-tiet-minhthanh11-10.html
 });

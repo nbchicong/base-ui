@@ -53,6 +53,12 @@
         </jsbuilder>
     </target>
 
+    <target name="js-uploader-components.compile" description="JS Uploader Components Compile" depends="init">
+        <jsbuilder dir="${build-lib.dir}" pattern="components/{PACKAGE}.min.js">
+            <source path="${sources.dir}/components/uploader"/>
+        </jsbuilder>
+    </target>
+
     <target name="js-base-class.compile" description="JS Base Class Compile" depends="init">
         <jsbuilder dir="${build-lib.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
             <source path="${sources.dir}/class"/>

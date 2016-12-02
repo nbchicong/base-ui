@@ -1,5 +1,5 @@
-
-//
+// #PACKAGE: grid-columns
+// #MODULE: InputFileUpload
 /**
  * Copyright (c) 2015 BaseUI Solutions Corp.,
  * Created by Nguyen Ba Chi Cong<nbccong@BaseUIcloud.vn>
@@ -26,7 +26,7 @@ $(function () {
   };
   BaseUI.extend(UI.grid.column.InputFileUpload, UI.grid.Editor, {
     render: function (v) {
-      if (BaseUI.isEmpty(v)) {
+      if (!v) {
         this.getCell().html('<i>Chưa đính kèm tập tin</i>');
         return;
       }
@@ -59,33 +59,47 @@ $(function () {
       var __onChange = __column.onChange || BaseUI.emptyFn;
       var __deleteHtml = '<i data-action="delete" data-type="file" class="ace-icon fa fa-times red"></i>';
       var __html = '<ul class="list-unstyled">';
-      if (__multiple) {
-        if (BaseUI.isArray(v)) {
-          for (var i = 0; i < BaseUI.getSize(v); i++) {
-            __html += String.format('<li class="text-primary" data-code="{0}" data-name="{1}">{2} {3}</li>', v[i][__idField], v[i][__nameField], v[i][__displayField], __deleteHtml);
-          }
-        }
-        __html += String.format('<li data-type="input"><label id="file-upload-container" class="ace-file-input">' +
-          '<input type="file" id="input-file-upload" accept="{0}" />' +
-          '<span class="ace-file-container" data-type="button" data-title="Chọn tập tin">' +
-            '<span class="ace-file-name" data-type="label" data-title="Chưa tập tin nào được chọn">' +
-              '<i data-type="icon" class="ace-icon fa fa-upload"></i>' +
-            '</span>' +
-          '</span>' +
-          '<a class="remove" href="javascript:;" data-action="remove"><i class="ace-icon fa fa-times"></i></a>' +
-        '</label></li>', __acceptFile);
-      } else {
-        __html += String.format('<li data-type="input" data-code="{0}" data-name="{1}">' +
-          '<label id="file-upload-container" class="ace-file-input">' +
-            '<input type="file" id="input-file-upload" accept="{3}" />' +
+      if (!v)
+        __html += String.format('<li data-type="input">' +
+            '<label id="file-upload-container" class="ace-file-input">' +
+            '<input type="file" id="input-file-upload" ' + (__multiple?'multiple="multiple"':'') + ' accept="{3}" />' +
             '<span class="ace-file-container" data-type="button" data-title="Chọn tập tin">' +
-            '<span class="ace-file-name" data-type="label" data-title="{2}">' +
+            '<span class="ace-file-name" data-type="label" data-title="Chưa tập tin nào được chọn">' +
             '<i data-type="icon" class="ace-icon fa fa-upload"></i>' +
             '</span>' +
             '</span>' +
             '<a class="remove" href="javascript:;" data-action="remove"><i class="ace-icon fa fa-times"></i></a>' +
             '</label>' +
-          '</li>', v[0][__idField], v[0][__nameField], v[0][__displayField], __acceptFile);
+            '</li>', '', '', __acceptFile);
+      else {
+        if (__multiple) {
+          if (BaseUI.isArray(v)) {
+            for (var i = 0; i < BaseUI.getSize(v); i++) {
+              __html += String.format('<li class="text-primary" data-code="{0}" data-name="{1}">{2} {3}</li>', v[i][__idField], v[i][__nameField], v[i][__displayField], __deleteHtml);
+            }
+          }
+          __html += String.format('<li data-type="input"><label id="file-upload-container" class="ace-file-input">' +
+              '<input type="file" id="input-file-upload" multiple="multiple" accept="{0}" />' +
+              '<span class="ace-file-container" data-type="button" data-title="Chọn tập tin">' +
+              '<span class="ace-file-name" data-type="label" data-title="Chưa tập tin nào được chọn">' +
+              '<i data-type="icon" class="ace-icon fa fa-upload"></i>' +
+              '</span>' +
+              '</span>' +
+              '<a class="remove" href="javascript:;" data-action="remove"><i class="ace-icon fa fa-times"></i></a>' +
+              '</label></li>', __acceptFile);
+        } else {
+          __html += String.format('<li data-type="input" data-code="{0}" data-name="{1}">' +
+              '<label id="file-upload-container" class="ace-file-input">' +
+              '<input type="file" id="input-file-upload" accept="{3}" />' +
+              '<span class="ace-file-container" data-type="button" data-title="Chọn tập tin">' +
+              '<span class="ace-file-name" data-type="label" data-title="{2}">' +
+              '<i data-type="icon" class="ace-icon fa fa-upload"></i>' +
+              '</span>' +
+              '</span>' +
+              '<a class="remove" href="javascript:;" data-action="remove"><i class="ace-icon fa fa-times"></i></a>' +
+              '</label>' +
+              '</li>', v[0][__idField], v[0][__nameField], v[0][__displayField], __acceptFile);
+        }
       }
       this.setEl($(String.format('<span>{0}</ul></span>', __html)));
       this.getEl().on('click', '[data-action="delete"]', function () {
@@ -103,7 +117,7 @@ $(function () {
         _this.getEl().find('.ace-file-container').attr('data-title', 'Thay đổi tập tin');
         _this.getEl().find('[data-type="icon"]').removeClass('fa-upload').addClass('fa-file');
         _this.setFiles(this.files);
-        __onChange(this.files);
+        __onChange.call(_this, this.files);
       });
     },
     setFiles: function (files) {

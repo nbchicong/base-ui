@@ -18,6 +18,37 @@ $(function () {
    * @class UI.ProductEntity
    * @extends UI.Entity
    */
+  var __contentEditor = null;
+  var __editorInstalled = false;
+  function __renderListFontSize(begin, end) {
+    var __font = '';
+    for (var i = begin; i <= end; i++) {
+      __font += i + 'px ';
+    }
+    return __font.slice(0, -1);
+  }
+  function __installTinyMCE() {
+    tinymce.init({
+      selector: '#txt-content',
+      height: 400,
+      plugins: [
+        'advlist autolink lists link image charmap print preview anchor',
+        'searchreplace visualblocks code fullscreen',
+        'insertdatetime media table contextmenu paste code'
+      ],
+      toolbar: 'undo redo | styleselect fontselect fontsizeselect | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+      content_css: [
+        '../../../css/bootstrap.min.css',
+        '../../../css/main.css',
+        '../../../css/responsive.css'
+      ],
+      fontsize_formats: __renderListFontSize(9, 36),
+      init_instance_callback: function (editor) {
+        __contentEditor = editor;
+        __editorInstalled = true;
+      }
+    });
+  }
   UI.ProductEntity = function () {
     var _this = this;
     this.id = 'product-entity';
@@ -47,14 +78,15 @@ $(function () {
       availability: $('#cbx-availability'),
       promotions: $('#cbx-promotions'),
       discount: $('#txt-discount'),
-      tags: $('#txt-tags')
+      tags: $('#txt-tags'),
+      details: $('#txt-content')
     };
     this.dataSource = new UI.grid.DataSource({
-      columns: [{
+      columns: [/*{
         type: 'selection',
         align: 'center',
         width: 30
-      }, {
+      }, */{
         property: 'name',
         label: 'Tên sản phẩm',
         sortable : true,
@@ -125,6 +157,7 @@ $(function () {
       remotePaging: true
     });
     UI.ProductEntity.superclass.constructor.call(this);
+    __installTinyMCE.call(this);
     this.$toolbar.CREATE.on('click', function () {
       _this.clear();
       _this.next();
@@ -148,6 +181,12 @@ $(function () {
     getEntity: function () {
       return this.entity;
     },
+    setEditorContent: function (content) {
+      if (__editorInstalled)
+        __contentEditor.setContent(content);
+      else
+        this.setEditorContent(content);
+    },
     setData: function (data) {
       this.setEntity(data);
       this.$form.name.val(data.name);
@@ -160,6 +199,7 @@ $(function () {
       this.$form.promotions[0].checked = data.promotions;
       this.$form.discount.val(data.discount);
       this.$form.tags.val(data.tags);
+      this.setEditorContent(BaseUI.isEmpty(data.details)?'':data.details);
     },
     getData: function () {
       var __fd = new FormData();
@@ -167,6 +207,7 @@ $(function () {
       this.getParams().forEach(function (item) {
         __fd.append(item.name, item.value);
       });
+      __fd.append('details', __contentEditor.getContent());
       if (!BaseUI.isEmpty(this.getEntityId())) {
         __fd.append(this.getIdProperties(), this.getEntityId());
       }
@@ -176,10 +217,14 @@ $(function () {
       return this.$content.find('form');
     },
     create: function (callback) {
+      var _this = this;
       var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.create,
         clearForm: false,
+        beforeSerialize: function () {
+          _this.$form.details.val(__contentEditor.getContent());
+        },
         uploadProgress: function (event, position, total, percentComplete) {
           console.log('upload progress', position, total, percentComplete);
         },
@@ -199,10 +244,14 @@ $(function () {
       // }
     },
     update: function (callback) {
+      var _this = this;
       var __fn = callback || BaseUI.emptyFn;
       var __options = {
         url: this.url.update,
         clearForm: false,
+        beforeSerialize: function () {
+          _this.$form.details.val(__contentEditor.getContent());
+        },
         uploadProgress: function (event, position, total, percentComplete) {
           console.log('upload progress', position, total, percentComplete);
         },

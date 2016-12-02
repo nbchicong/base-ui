@@ -1,6 +1,6 @@
 /**
  * #PACKAGE: joinedus
- * #MODULE: entry-entity
+ * #MODULE: page-content-entity
  */
 /**
  * @license Copyright (c) 2016 CT1905
@@ -9,15 +9,16 @@
  */
 /**
  * Project: laravel
- * @name: EntryEntity
+ * @name: PageContentEntity
  * @package: ${NAMESPACE}
  * @author: nbchicong
  */
 $(function () {
   /**
-   * @class UI.EntryEntity
+   * @class UI.PageContentEntity
    * @extends UI.Entity
    */
+
   var __contentEditor = null;
   var __editorInstalled = false;
   function __renderListFontSize(begin, end) {
@@ -49,57 +50,47 @@ $(function () {
       }
     });
   }
-  UI.EntryEntity = function () {
+  UI.PageContentEntity = function () {
     var _this = this;
-    this.id = 'entry-entity';
+    this.id = 'page-content';
     this.submitType = 'JSON';
     this.$toolbar = {
       BACK: $('#btn-back'),
-      CREATE: $('#btn-add'),
+      CREATE: $('#btn-create'),
       SAVE: $('#btn-save')
     };
     this.url = {
-      list: ('entry/list'),
-      load: ('entry/load'),
-      create: ('entry/create'),
-      update: ('entry/update'),
-      remove: ('entry/remove')
+      list: ('page/list'),
+      load: ('page/load'),
+      create: ('page/create'),
+      update: ('page/update'),
+      remove: ('page/remove')
     };
     this.$listItem = $('#list-items');
     this.$content = $('#item-content');
     this.$form = {
       id: $('#txt-id'),
       title: $('#txt-title'),
-      category: $('#cbb-category'),
       content: $('#txt-content'),
-      image: $('#txt-price'),
       tags: $('#txt-tags')
     };
     this.dataSource = new UI.grid.DataSource({
-      columns: [/*{
+      columns: [{
         type: 'selection',
         align: 'center',
         width: 30
-      }, */{
+      }, {
         property: 'title',
-        label: 'Tên bài viết',
-        sortable : true,
+        label: 'Tiêu đề',
+        sortable: true,
         type: 'text',
         align: 'left'
       }, {
-        property: 'cateId',
-        label: 'Loại',
-        sortable : true,
-        type: 'text',
-        align: 'left',
-        width: 100
-      }, {
         property: 'author',
         label: 'Người viết',
-        sortable : true,
+        sortable: true,
         type: 'text',
-        align: 'left',
-        width: 150
+        width: 300
       }, {
         label: '',
         type: 'action',
@@ -111,7 +102,7 @@ $(function () {
           labelCls: 'label label-info',
           fn: function (record) {
             _this.setEntity(record);
-            _this['editRow'].call(_this, record);
+            _this.editRow(record);
           }
         }, {
           text: 'Xóa',
@@ -121,16 +112,9 @@ $(function () {
             var r = confirm('Bạn có đồng ý xóa?');
             if (r) {
               _this.setEntity(record);
-              _this['removeRow'].call(_this, record);
+              _this.removeRow(record);
             }
-          }/*,
-           visibled: function(record){
-           var __data= record || {};
-           if(__data.status=='approved' || __data.status=='completed') {
-           return false;
-           }
-           return true;
-           }*/
+          }
         }]
       }],
       delay: 100
@@ -143,7 +127,7 @@ $(function () {
       pageSize: 10,
       remotePaging: true
     });
-    UI.EntryEntity.superclass.constructor.call(this);
+    UI.PageContentEntity.superclass.constructor.call(this);
     __installTinyMCE.call(this);
     this.$toolbar.CREATE.on('click', function () {
       _this.clear();
@@ -157,7 +141,7 @@ $(function () {
       _this.save(_this);
     });
   };
-  BaseUI.extend(UI.EntryEntity, UI.Entity, {
+  BaseUI.extend(UI.PageContentEntity, UI.Entity, {
     clear: function () {
       this.setEntityId(null);
       this.getForm().find('input,textarea').val('');
@@ -177,100 +161,36 @@ $(function () {
     setData: function (data) {
       this.setEntity(data);
       this.$form.title.val(data.title);
-      this.$form.category.val(data.cateId);
-      this.$form.image.val(data.image);
       this.$form.tags.val(data.tags);
       this.setEditorContent(BaseUI.isEmpty(data.content)?'':data.content);
     },
     getData: function () {
-      var __fd = new FormData();
-      this.setParams(this.getForm().serializeArray());
-      this.getParams().forEach(function (item) {
-        __fd.append(item.name, item.value);
-      });
-      __fd.append('content', __contentEditor.getContent());
-      if (!BaseUI.isEmpty(this.getEntityId())) {
-        __fd.append(this.getIdProperties(), this.getEntityId());
-      }
-      return __fd;
+      return {
+        title: this.$form.title.val(),
+        content: __contentEditor.getContent(),
+        tags: this.$form.tags.val()
+      };
     },
     getForm: function () {
-      return this.$content.find('form');
-    },
-    create: function (callback) {
-      var _this = this;
-      var __fn = callback || BaseUI.emptyFn;
-      var __options = {
-        url: this.url.create,
-        clearForm: false,
-        beforeSerialize: function () {
-          _this.$form.content.val(__contentEditor.getContent());
-        },
-        uploadProgress: function (event, position, total, percentComplete) {
-          console.log('upload progress', position, total, percentComplete);
-        },
-        success: function (responseText, statusText, xhr) {
-          __fn(responseText, statusText, xhr);
-        },
-        error: function (error) {
-          console.log('create error', error);
-        },
-        type: 'POST'
-      };
-      this.getForm().ajaxSubmit(__options);
-      // if (!BaseUI.isEmpty(this.getParams())) {
-      //   this.sendAjax(__options, __fn);
-      // } else {
-      //   console.log('%cParams can not empty when change data', 'color: #FF0000');
-      // }
-    },
-    update: function (callback) {
-      var _this = this;
-      var __fn = callback || BaseUI.emptyFn;
-      var __options = {
-        url: this.url.update,
-        clearForm: false,
-        beforeSerialize: function () {
-          _this.$form.content.val(__contentEditor.getContent());
-        },
-        uploadProgress: function (event, position, total, percentComplete) {
-          console.log('upload progress', position, total, percentComplete);
-        },
-        success: function (responseText, statusText, xhr) {
-          __fn(responseText, statusText, xhr);
-        },
-        error: function (error) {
-          console.log('update error', error);
-        },
-        type: 'POST'
-      };
-      this.$form.id.val(this.getEntityId());
-      this.getForm().ajaxSubmit(__options);
-      // if (!BaseUI.isEmpty(this.getParams())) {
-      //   this.sendAjax(__options, __fn);
-      // } else {
-      //   console.log('%cParams can not empty when change data', 'color: #FF0000');
-      // }
+      return this.$content.find('[role="form"]');
     },
     save: function () {
       var _this = this;
-      console.log('save entry', this.getForm());
-      // this.getForm().ajaxSubmit();
-      // this.getForm().submit(function () {
-      //   $(this).ajaxSubmit();
-      //   return false;
-      // });
+      var __data = this.getData();
       if (!BaseUI.isEmpty(this.getEntityId())) {
+        __data.id = this.getEntityId();
+        this.setParams(__data);
         this.update(function (data) {
-          _this.responseHandle(data, function () {
+          _this.responseHandle(data, function (response) {
             _this.grid.reload();
             _this.notify('Update success', 'success');
             console.log('%cUpdate success', 'color: #00FF00');
           });
-        });
+        })
       } else {
+        this.setParams(__data);
         this.create(function (data) {
-          _this.responseHandle(data, function () {
+          _this.responseHandle(data, function (response) {
             _this.grid.reload();
             _this.notify('Create success', 'success');
             console.log('%cCreate success', 'color: #00FF00');
@@ -278,27 +198,18 @@ $(function () {
         });
       }
     },
-    load: function (callback) {
-      var __params = {id: this.getEntityId()};
-      var __fn = callback || BaseUI.emptyFn;
-      this.sendAjax({
-        url: this.url.load,
-        method: 'GET',
-        data: (this.getSubmitType()=='JSON_STRING'?JSON.stringify(__params):__params),
-        dataType: 'JSON',
-        contentType: 'application/json'
-      }, __fn);
-    },
     editRow: function (row) {
       var _this = this;
       this.setEntity(row);
       this.setEntityId(row[this.getIdProperties()]);
-      this.load(function (data) {
-        _this.responseHandle(data, function () {
-          _this.setData(data);
-          _this.next();
-        });
-      });
+      _this.setData(row);
+      _this.next();
+      // this.load(function (data) {
+      //   _this.responseHandle(data, function () {
+      //     _this.setData(data);
+      //     _this.next();
+      //   });
+      // });
     },
     removeRow: function (row) {
       var _this = this;
@@ -323,5 +234,5 @@ $(function () {
       this.$toolbar.SAVE.show();
     }
   });
-  new UI.EntryEntity();
+  new UI.PageContentEntity();
 });

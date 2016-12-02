@@ -55,6 +55,28 @@ $(function () {
         value: '',
         width: 300
       }, {
+        property: 'imageCode',
+        label: 'Hình đại diện',
+        sortable: true,
+        type: 'fileUpload',
+        width: 200,
+        multiple: false,
+        acceptFile: '.png,.jpg,.jpeg,.gif',
+        onChange: function (files) {
+          var file = files[0];
+          var __html = '<ul class="list-unstyled">';
+              __html += String.format('<li class="text-primary" data-code="{0}" data-name="{1}">{1}</li>', BaseUI.generateId(), file.name);
+          this.setEl($(String.format('<span>{0}</ul></span>', __html)));
+        },
+        renderer: function (v) {
+          if (!v) return null;
+          return [{
+            uuid: v,
+            name: v,
+            file: v
+          }];
+        }
+      }, {
         label: '',
         type: 'action',
         separate: '&nbsp;',
@@ -130,8 +152,7 @@ $(function () {
         this.setParams(__data);
         this.update(function (data) {
           _this.responseHandle(data, function (response) {
-            _this.grid.update(__data);
-            _this.grid.commit();
+            _this.grid.reload();
             _this.notify('Update success', 'success');
             console.log('%cUpdate success', 'color: #00FF00');
           });
@@ -140,8 +161,7 @@ $(function () {
         this.setParams(__data);
         this.create(function (data) {
           _this.responseHandle(data, function (response) {
-            _this.grid.insert(data);
-            _this.grid.commit();
+            _this.grid.reload();
             _this.notify('Create success', 'success');
             console.log('%cCreate success', 'color: #00FF00');
           });
