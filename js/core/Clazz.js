@@ -41,6 +41,9 @@ $(function () {
               .parent().addClass('menu-open').show()
               .parent().addClass('active');
     },
+    getSvc: function(svcName) {
+      return svcName + '.svc';
+    },
     responseHandle: function (response, callback) {
       var __fn = callback || BaseUI.emptyFn;
       if (response.success || response.id) {

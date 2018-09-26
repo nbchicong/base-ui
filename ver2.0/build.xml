@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JS Core ver2.0" basedir=".">
+    <property name="project-name" value="base-ui-core"/>
+    <property name="resources.dir" value="${basedir}"/>
+    <property name="js.dir" value="${resources.dir}"/>
+
+    <property name="sources.dir" value="${js.dir}"/>
+    <property name="core.dir" value="${sources.dir}/core"/>
+    <property name="component.dir" value="${sources.dir}/components"/>
+
+    <property name="build.dir" value="${js.dir}/build"/>
+    <property name="target.dir" value="${js.dir}/libs"/>
+
+    <property name="buildtool.dir" value="../"/>
+    <property name="jsBuilder" location="${buildtool.dir}/jsbuilder.jar"/>
+    <taskdef name="jsbuilder" classname="org.antz29.jsbuilder.ant.BuilderTask" classpath="${jsBuilder}"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}" deleteonexit="true"/>
+        <delete dir="${target.dir}" deleteonexit="true"/>
+    </target>
+
+    <target name="init" description="Create the build dir">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${target.dir}"/>
+        <echo>Target dir has been installed!</echo>
+    </target>
+
+    <target name="core.compile" description="JavaScript Core Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="{PACKAGE}.min.js">
+            <module package="core" name="Copyright" file="${core.dir}/Copy.js"/>
+            <module package="core" name="CoreFunction" file="${core.dir}/CoreFunction.js"/>
+            <module package="core" name="CoreClazz" file="${core.dir}/CoreClazz.js"/>
+            <module package="core" name="Hashtable" file="${core.dir}/Hashtable.js"/>
+            <module package="core" name="App" file="${core.dir}/App.js"/>
+            <module package="layout" name="Layout" file="${core.dir}/Layout.js"/>
+        </jsbuilder>
+    </target>
+
+    <target name="component.grid.compile" description="JavaScript Component Grid Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="components/grid.min.js">
+            <module name="AbstractColumnManager" file="${component.dir}/grid/AbstractColumnManager.js"/>
+            <module name="AbstractSearchForm" file="${component.dir}/grid/AbstractSearchForm.js"/>
+            <module name="Column" file="${component.dir}/grid/Column.js"/>
+            <module name="ColumnModel" file="${component.dir}/grid/ColumnModel.js"/>
+            <module name="DataSource" file="${component.dir}/grid/DataSource.js"/>
+            <module name="Editor" file="${component.dir}/grid/Editor.js"/>
+            <module name="Grid" file="${component.dir}/grid/Grid.js"/>
+            <module name="jquery.events" file="${component.dir}/grid/jquery.events.js"/>
+            <module name="Search" file="${component.dir}/grid/Search.js"/>
+            <module name="Selection" file="${component.dir}/grid/Selection.js"/>
+            <module name="Underscore" file="${component.dir}/grid/Underscore.js"/>
+        </jsbuilder>
+        <jsbuilder dir="${build.dir}" pattern="components/grid-columns.min.js">
+            <module name="ActionButton" file="${component.dir}/grid/column/ActionButton.js"/>
+            <module name="Checkbox" file="${component.dir}/grid/column/Checkbox.js"/>
+            <module name="CheckboxGroup" file="${component.dir}/grid/column/CheckboxGroup.js"/>
+            <module name="InputFileUpload" file="${component.dir}/grid/column/InputFileUpload.js"/>
+            <module name="Label" file="${component.dir}/grid/column/Label.js"/>
+            <module name="Select" file="${component.dir}/grid/column/Select.js"/>
+            <module name="Selection" file="${component.dir}/grid/column/Selection.js"/>
+            <module name="Selectx" file="${component.dir}/grid/column/Selectx.js"/>
+            <module name="Textbox" file="${component.dir}/grid/column/Textbox.js"/>
+            <module name="TypeAhead" file="${component.dir}/grid/column/TypeAhead.js"/>
+        </jsbuilder>
+    </target>
+
+    <target name="component.dialog.compile" description="JavaScript Component Dialog Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/components/dialog"/>
+        </jsbuilder>
+    </target>
+
+    <target name="component.loading.compile" description="JavaScript Component Loading Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/components/loading"/>
+        </jsbuilder>
+    </target>
+
+    <target name="component.notify.compile" description="JavaScript Component Notify Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/components/notify"/>
+        </jsbuilder>
+    </target>
+
+    <target name="component.uploader.compile" description="JavaScript Component Uploader Compile" depends="init">
+        <jsbuilder dir="${build.dir}" pattern="{PACKAGE}/{MODULE}.min.js">
+            <source path="${sources.dir}/components/uploader"/>
+        </jsbuilder>
+    </target>
+
+    <target name="copy.libs" description="Copy all minify" depends="
+        core.compile,
+        component.dialog.compile,
+        component.grid.compile,
+        component.loading.compile,
+        component.notify.compile,
+        component.uploader.compile">
+        <copy todir="${target.dir}" overwrite="true">
+            <fileset dir="${build.dir}" includes="**/*.min.js"/>
+        </copy>
+    </target>
+
+    <target name="build.libs" depends="copy.libs" description="Build All">
+        <delete dir="${build.dir}" deleteonexit="true"/>
+    </target>
+</project>

@@ -27,10 +27,10 @@ $(function () {
       CREATE: $('#btn-add')
     };
     this.url = {
-      list: ('category/list'),
-      create: ('category/create'),
-      update: ('category/update'),
-      remove: ('category/remove')
+      list: ('category/list.svc'),
+      create: ('category/create.svc'),
+      update: ('category/update.svc'),
+      remove: ('category/remove.svc')
     };
     this.$listItem = $('#list-items');
     this.dataSource = new UI.grid.DataSource({
@@ -93,8 +93,7 @@ $(function () {
           icon: 'fa fa-trash',
           labelCls: 'label label-important',
           fn: function (record) {
-            var r = confirm('Bạn có đồng ý xóa?');
-            if (r) {
+            if (confirm('Bạn có đồng ý xóa?')) {
               _this.setEntity(record);
               _this['removeRow'].call(_this, record);
             }
@@ -116,7 +115,11 @@ $(function () {
       dataSource: this.dataSource,
       idProperty: 'id',
       pageSize: 10,
-      remotePaging: true
+      remotePaging: true,
+      convertData: function (result) {
+        this.setTotal(result.total);
+        return result.data || [];
+      }
     });
     UI.ProductCategoryEntity.superclass.constructor.call(this);
     this.$toolbar.CREATE.on('click', function () {

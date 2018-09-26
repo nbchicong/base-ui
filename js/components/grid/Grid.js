@@ -720,9 +720,7 @@ $(function () {
       this.options.dataOptions.pageIndex = __page;
       if (this.remotePaging) {
         var __params = this.getParams();
-        if(!BaseUI.isEmpty(__params)) {
-          __params[this.getPageProperty()] = this.options.dataOptions.pageIndex;
-        }
+        __params[this.getPageProperty()] = this.options.dataOptions.pageIndex;
         this.setParams(__params);
         this.load();
       } else {
@@ -1198,7 +1196,7 @@ $(function () {
       this.params = params || {};
     },
     getParams: function () {
-      return this.params;
+      return this.params || {};
     },
     setUrl: function (url) {
       this.url = url || '';

@@ -9,6 +9,12 @@
  * @class BaseUI
  */
 
+CC = {
+  version: '1.0.0',
+  undefined: window['undefined']
+};
+
+
 BaseUI = {version: '1.0.0'};
 window['undefined'] = window['undefined'];
 BaseUI.apply = function (obj, config, defaults) {

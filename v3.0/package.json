@@ -1,0 +1,29 @@
+{
+  "name": "monkey-web-core-js",
+  "version": "3.0.0",
+  "description": "Monkey Web Core JS",
+  "author": "Nguyen Ba Chi Cong <nbchicong@gmail.com>",
+  "license": "Monkey Travel",
+  "homepage": "http://monkey.vn",
+  "dependencies": {
+    "@types/jquery": "^3.3.10",
+    "@types/typescript-deferred": "^0.1.28",
+    "clean-css": "~3.4.12",
+    "dateformat": "~2.0.0",
+    "fs-extra": "~0.30.0",
+    "gulp": "~3.9.1",
+    "gulp-replace": "^0.6.1",
+    "gulp-zip": "~3.2.0",
+    "uglify-js": "~2.6.2"
+  },
+  "keywords": [
+    "Monkey Travel"
+  ],
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/nbchicong/base-ui.git"
+  },
+  "directories": {
+    "doc": "README.md"
+  }
+}
