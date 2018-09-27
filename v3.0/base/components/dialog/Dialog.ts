@@ -1,5 +1,5 @@
 import {BaseComponent} from "../../core/CoreClazz";
-import {$, isArray, generateId} from "../../core/CoreFunction";
+import {isArray, generateId} from "../../core/CoreFunction";
 
 export class Dialog extends BaseComponent {
     id: string = 'modal-dialog';
@@ -22,14 +22,13 @@ export class Dialog extends BaseComponent {
         this.getEl().html(__html);
     }
 
-    getEl() {
+    getEl(): JQuery<HTMLElement> {
         return $(this.dialogId);
     }
 
     getButtons() {
         return this.getEl().find('.modal-footer button');
     }
-
 
     show() {
         if (this.getEl().length < 1) {
@@ -73,7 +72,7 @@ export class Dialog extends BaseComponent {
                 let __button = this.buttons[i];
                 __button.id = (__button.id) ? __button.id : 'btn-' + generateId();
                 __html += '<button id="' + __button.id + '" class="btn btn-sm ' + (__button.cls || '') + '"><span class="' + __button.icon + '"></span> ' + __button.text + '</button>';
-                this.getEl().off('click', '#' + __button.id).on('click', '#' + __button.id, __button.fn.createDelegate(this));
+                this.getEl().off('click', '#' + __button.id).on('click', '#' + __button.id, __button.fn.delegate(this));
             }
         }
         return __html;

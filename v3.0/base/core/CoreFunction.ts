@@ -2,8 +2,6 @@
 let toString = Object.prototype.toString;
 let userAgent = navigator.userAgent.toLowerCase();
 
-export declare let $:any;
-
 export function checkBrowser(r){
     return r.test(userAgent);
 }
@@ -195,8 +193,8 @@ export function uploadFile(files, callback) {
     }, callback);
 }
 
-// @ts-ignore
-Function.prototype.createDelegate = function (obj, args, appendArgs) {
+// Apply new method to Function prototype
+Function.prototype['delegate'] = function (obj, args, appendArgs) {
     let method = this;
     return function () {
         let callArgs = args || arguments;

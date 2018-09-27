@@ -6,6 +6,7 @@
   "license": "Monkey Travel",
   "homepage": "http://monkey.vn",
   "dependencies": {
+    "@types/bootstrap": "^4.1.2",
     "@types/jquery": "^3.3.10",
     "@types/typescript-deferred": "^0.1.28",
     "clean-css": "~3.4.12",

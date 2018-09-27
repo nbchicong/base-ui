@@ -1,30 +1,12 @@
-import {$, getConfig, isDefined, isEmpty, isFunction, toArray} from "./CoreFunction";
+import {getConfig, isDefined, isEmpty, isFunction, toArray} from "./CoreFunction";
 
-export interface Component {
-    name: string;
-    initial();
-    on(e, fn);
-    un(e);
-}
-
-export class BaseComponent implements Component {
-    name: string;
-
+export class Clazz {
     private events: object = {};
+    element: JQuery<HTMLElement|Document>;
 
-    constructor() {
-        this.initial();
+    getEl(): JQuery<HTMLElement|Document> {
+        return this.element;
     }
-
-    initial() {
-        window[this.name] = this;
-        this.initComponent();
-    }
-
-    /**
-     * @abstract
-     */
-    initComponent(){}
 
     on(e, fn) {
         this.events = this.events || {};
@@ -64,10 +46,38 @@ export class BaseComponent implements Component {
         args.shift();
         fn.apply(this, args);
     }
+
+    /**
+     *
+     * @param {String} message  Message notify
+     * @param {String} type     Type of notify: info|success|warning|error
+     */
+    notify(message: string, type?: string) {
+        this.getEl().trigger('notify', [message, type]);
+    }
+}
+
+export class BaseComponent extends Clazz {
+    name: string;
+
+    constructor() {
+        super();
+        this.initial();
+    }
+
+    initial() {
+        window[this.name] = this;
+        this.initComponent();
+    }
+
+    /**
+     * @abstract
+     */
+    initComponent(){}
 }
 
 
-export class BaseClazz {
+export class BaseClazz extends Clazz {
     id: string = null;
     idKey: string = 'id';
 
@@ -86,7 +96,7 @@ export class BaseClazz {
         return this.idKey;
     }
 
-    getEl() {
+    getEl(): JQuery<HTMLElement> {
         return $('#' + this.getId());
     }
 }
